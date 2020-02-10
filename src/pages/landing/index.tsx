@@ -34,9 +34,6 @@ const Landing: React.FC = () => {
     return () => clearInterval(interval);
   }, [dispatch, pullRequestsOfUserTypeFilter, state]);
 
-  useEffect(() => {
-    console.log(process.env);
-  }, []);
   if (isLoading || error) {
     return <p>loading mutha fucka</p>;
   }
