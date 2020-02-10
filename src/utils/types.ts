@@ -1,23 +1,29 @@
-export interface Issue {
+export interface PullRequest {
   number: number;
-  state: string;
+  closed: Boolean;
   title: string;
-  user: {
+  author: {
     name: string;
   };
-  labels: [string];
-  assignee: {
-    login: string;
-  };
-  assignees: [];
+  requestedReviewers: string[];
+  labels: string[];
   repository: string;
   createdAt: string;
-  updatedAt: string;
+  hasChanged: boolean;
+  id: string;
 }
 
 export interface PullRequestFilterState {
-  showPullRequests: string;
+  userInvolvementType: string;
 }
 export interface PullRequestsState {
-  pullRequests: Issue[];
+  isLoading: boolean;
+  error: string | null;
+  createdPullRequests: PullRequest[];
+  reviewRequestedPullRequests: PullRequest[];
+}
+
+export interface State {
+  pullRequestFilter: PullRequestFilterState;
+  pullRequests: PullRequestsState;
 }

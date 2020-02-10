@@ -1,25 +1,21 @@
 import React from "react";
-import "./App.css";
 import { Routes } from "./routes";
-import { configureStore } from "@reduxjs/toolkit";
-import { pullRequestFilterSlice } from "./store/pullRequestFilter";
-import { pullRequestsSlice } from "./store/pullRequests";
+import { store } from "store";
 import { Provider } from "react-redux";
-
-const store = configureStore({
-  reducer: {
-    pullRequestFilter: pullRequestFilterSlice.reducer,
-    pullRequests: pullRequestsSlice.reducer
-  }
-});
+import { ThemeProvider } from "utils/styled";
+import { GlobalStyles } from "components/styled";
+import { mainTheme } from "themes";
 
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <Provider store={store}>
-        <Routes />
-      </Provider>
-    </div>
+    <Provider store={store}>
+      <ThemeProvider theme={mainTheme}>
+        <>
+          <GlobalStyles />
+          <Routes />
+        </>
+      </ThemeProvider>
+    </Provider>
   );
 };
 

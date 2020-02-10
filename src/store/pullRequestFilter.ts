@@ -1,17 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PullRequestFilterState } from "../utils/types";
+import { PullRequestFilterState } from "utils/types";
+
+const initialState: PullRequestFilterState = {
+  userInvolvementType: "author"
+};
 
 export const pullRequestFilterSlice = createSlice({
   name: "filter",
-  initialState: {
-    showPullRequests: "author"
-  },
+  initialState,
   reducers: {
     setPullRequestFilter: (
       state: PullRequestFilterState,
-      action: PayloadAction<string>
+      { payload }: PayloadAction<string>
     ) => {
-      state.showPullRequests = action.payload;
+      state.userInvolvementType = payload;
     }
   }
 });

@@ -13,9 +13,12 @@ const ToolBar: React.FC<Props> = () => {
 
   return (
     <div>
-      {/* <button onClick={() => setFilter("all")}>ALL</button> */}
-      <button onClick={() => setFilter("author")}>CREATED BY ME</button>
-      <button onClick={() => setFilter("assignee")}>ASSIGNED TO ME</button>
+      <button onClick={() => setFilter("author")}>CREATED</button>
+      {/* <button onClick={() => setFilter("assignee")}>ASSIGNED</button>
+      <button onClick={() => setFilter("involves")}>MENTIONED</button> */}
+      <button onClick={() => setFilter("review-requested")}>
+        REVIEW REQUESTED
+      </button>
     </div>
   );
 };
