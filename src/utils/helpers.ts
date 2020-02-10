@@ -1,4 +1,4 @@
-import octokit, { graphqlWithAuth } from "./octo-client";
+import { graphqlWithAuth } from "./octo-client";
 import { GraphQlQueryResponseData } from "@octokit/graphql/dist-types/types";
 import { PullRequest } from "./types";
 
@@ -27,13 +27,7 @@ export const normalizeGqlResponse = (data: Array<any>) =>
     id: node.id
   }));
 
-export const getPullRequests = async (userInvolvementType: string) => {
-  return await octokit.search.issuesAndPullRequests({
-    q: `${userInvolvementType}:ksyhoo+state:open+type:pr`
-  });
-};
 // involves:USERNAME
-
 export const searchPullRequestsGql = async (
   userInvolvementType: string
 ): Promise<GraphQlQueryResponseData> =>

@@ -27,3 +27,5 @@ export interface State {
   pullRequestFilter: PullRequestFilterState;
   pullRequests: PullRequestsState;
 }
+
+export type ReviewStatus = "ACCEPTED" | "CHANGES";
