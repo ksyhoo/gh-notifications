@@ -27,8 +27,6 @@ const Auth: React.FC = () => {
       //   filter: "all"
       // });
 
-      // console.log(d);
-
       return null;
     }
     fetchData();
