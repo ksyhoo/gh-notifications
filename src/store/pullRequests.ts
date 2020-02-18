@@ -6,9 +6,15 @@ import {
   normalizeGqlResponse,
   getAuthorPullRequests,
   getToReviewPullRequests,
-  data
+  mockData,
+  normalizeGqlResponseToObject
 } from "utils/helpers";
 import deepEqual from "deep-equal";
+
+import { GraphQLNormalizr } from "graphql-normalizr";
+
+// const config = ...
+const { normalize } = new GraphQLNormalizr({});
 
 const initialState: PullRequestsState = {
   isLoading: false,
@@ -37,59 +43,102 @@ export const pullRequestsSlice = createSlice({
     ) => {
       state.error = payload;
     },
-    setUpdatesInCreatedPullRequests: (
-      state: PullRequestsState,
-      action: PayloadAction<any>
-    ) => {}
+
+    checkForUpdatesAuthorPullRequests: (
+      state,
+      { payload }: PayloadAction<PullRequest[]>
+    ) => {
+      state.createdPullRequests.forEach((pullRequest: PullRequest) => {
+        const toCompare = payload.find(
+          (payloadItem: PullRequest) => payloadItem.id === pullRequest.id
+        );
+        const index = state.createdPullRequests.findIndex(
+          (item: PullRequest) => item.id === pullRequest.id
+        );
+        if (deepEqual(toCompare, pullRequest)) {
+          state.createdPullRequests[index] = pullRequest;
+        }
+        state.createdPullRequests[index] = toCompare as PullRequest;
+      });
+    },
+    checkForUpdatesReviewRequestedPullRequests: (
+      state,
+      { payload }: PayloadAction<PullRequest[]>
+    ) => {
+      const newRequests = checkForNewReviewRequests(
+        payload,
+        state.reviewRequestedPullRequests
+      );
+
+      state.reviewRequestedPullRequests = newRequests;
+    }
   }
 });
 
 const { actions } = pullRequestsSlice;
 export const {
+  checkForUpdatesAuthorPullRequests,
+  checkForUpdatesReviewRequestedPullRequests,
   getPullRequestsSuccess,
   getPullRequestsError,
-  getPullRequestsLoading,
-  setUpdatesInCreatedPullRequests
+  getPullRequestsLoading
 } = actions;
 
-export const fetchPullRequestsThunk = (
-  userInvolvementType: string
-): AppThunk => async (dispatch) => {
+export const fetchPullRequests = (): AppThunk => async (dispatch) => {
   try {
     dispatch(getPullRequestsLoading(true));
-    const pullRequests = await searchPullRequestsGql(userInvolvementType);
+    const pullRequests = await searchPullRequestsGql();
+    if (pullRequests) {
+      const asd = normalizeGqlResponseToObject(pullRequests.search.edges, "id");
+      console.log(asd);
+
+      dispatch(
+        getPullRequestsSuccess(normalizeGqlResponse(pullRequests.search.edges))
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    dispatch(getPullRequestsError(err.toString()));
+  }
+  dispatch(getPullRequestsLoading(false));
+};
+
+//FIXME: remove mocked data with api response
+export const checkForUpdatesInStore = (data?: any): AppThunk => async (
+  dispatch
+) => {
+  try {
     dispatch(
-      getPullRequestsSuccess(
-        normalizeGqlResponse(pullRequests && pullRequests.search.edges)
+      checkForUpdatesAuthorPullRequests(getAuthorPullRequests(mockData))
+    );
+    dispatch(
+      checkForUpdatesReviewRequestedPullRequests(
+        getToReviewPullRequests(mockData)
       )
     );
   } catch (err) {
     dispatch(getPullRequestsError(err.toString()));
   }
-  dispatch(getPullRequestsLoading(false));
 };
-export const checkForUpdates = (
-  userInvolvementType: string,
-  state: PullRequestsState
-): AppThunk => async (dispatch) => {
-  try {
-    const pullRequests = await searchPullRequestsGql(userInvolvementType);
-    // const autor = getAuthorPullRequests(
-    //   normalizeGqlResponse(pullRequests && pullRequests.search.edges)
-    // );
-    const modified = state.createdPullRequests.map(
-      (pullRequest: PullRequest) => {
-        const toCompare = data.find((item) => item.id === pullRequest.id);
-        const equal = deepEqual(pullRequest, toCompare);
-        if (!equal) {
-          console.log("znalazl");
-          return { ...toCompare, hasChanged: true };
-        }
-        return pullRequest;
+
+//FIXME: Apply store updating values
+const checkForNewReviewRequests = (
+  data: any, // this should be fetched new data
+  reviewRequestedPullRequests: PullRequest[]
+) => {
+  if (data.length > reviewRequestedPullRequests.length) {
+    const modified = data.map((item: PullRequest) => {
+      const found = reviewRequestedPullRequests.find(
+        (pr: PullRequest) => pr.id === item.id
+      );
+      if (!found) {
+        return { ...item, isNewReviewRequest: true };
       }
-    );
-    console.log(modified);
-  } catch (err) {
-    dispatch(getPullRequestsError(err.toString()));
+      return found;
+    });
+    return modified;
+  } else if (data.length < reviewRequestedPullRequests.length) {
+    return data;
   }
+  return reviewRequestedPullRequests;
 };
