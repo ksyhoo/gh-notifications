@@ -1,60 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import moment from "moment";
 import Octicon, { GitPullRequest } from "@primer/octicons-react";
-import { Wrapper, Details, Description, Text } from "./pull-requests.styled";
-import { PullRequest, State } from "utils/types";
-import { useSelector } from "react-redux";
+import { Wrapper, Text, Item } from "./pull-requests.styled";
+import { PullRequest } from "utils/types";
+// import store from "store";
+
+// import watch from "redux-watch";
 
 interface Props {
-  data?: PullRequest[];
+  data?: PullRequest;
   userType?: string;
+  shouldItemUpdate?: boolean;
 }
 
-export const PullRequests: React.FC<Props> = ({ userType }) => {
-  const [displayData, setDisplayData] = useState<PullRequest[]>([]);
-  const pullRequests = useSelector(
-    (rootState: State) => rootState.pullRequests
-  );
-  useEffect(() => {
-    const data =
-      userType === "author"
-        ? pullRequests.createdPullRequests
-        : pullRequests.reviewRequestedPullRequests;
-    setDisplayData(data);
-  }, [pullRequests, userType]);
-  if (!displayData) {
-    return <Wrapper>PR's not found</Wrapper>;
+export const PullRequests: React.SFC<Props> = ({
+  data,
+  shouldItemUpdate
+}: Props) => {
+  if (!data) {
+    return <Wrapper>PR not found</Wrapper>;
   }
+
   return (
-    <>
-      {displayData.map((item: PullRequest) => (
-        <Wrapper key={item.createdAt}>
-          <Description>
-            <div>
-              <Octicon icon={GitPullRequest} />
-              {item.repository}
-            </div>
-            <span>{item.title}</span>
-          </Description>
-          <Details>
-            <>
-              <Text>#{item.number}</Text>
-              <Text>
-                <span>opened:</span>{" "}
-                {moment(item.createdAt).format("MMMM Do YYYY")}
-              </Text>
-            </>
-            <>
-              <Text>
-                <span>by:</span> {item.author}
-              </Text>
-              <Text>
-                <span>status:</span> {item.closed ? "closed" : "open"}
-              </Text>
-            </>
-          </Details>
-        </Wrapper>
-      ))}
-    </>
+    <Wrapper>
+      {shouldItemUpdate ? "tak" : "nie"}
+      <Item>
+        <Octicon icon={GitPullRequest} />
+        <Text> {data.repository}</Text>
+      </Item>
+      <Text>{data.title}</Text>
+      <Item>
+        <Text>PR#{data.number}</Text>
+        <Text>opened:{moment(data.createdAt).format("MMMM Do YYYY")}</Text>
+      </Item>
+      <Item>
+        <Text>author:{data.author}</Text>
+        <Text>status: {data.closed ? "closed" : "open"}</Text>
+      </Item>
+    </Wrapper>
   );
 };
