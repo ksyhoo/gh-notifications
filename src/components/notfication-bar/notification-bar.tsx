@@ -4,12 +4,16 @@ import { ReviewStatus } from "utils/types";
 
 interface Props {
   status: ReviewStatus;
+  numberOfNotifications: number;
 }
 
-export const NotificationBar: React.FC<Props> = ({ status }) => {
+export const NotificationBar: React.FC<Props> = ({
+  status,
+  numberOfNotifications
+}) => {
   return (
     <Wrapper>
-      <Notification status={status}>1</Notification>
+      <Notification status={status}>{numberOfNotifications}</Notification>
     </Wrapper>
   );
 };

@@ -7,5 +7,5 @@ export default {
 };
 
 export const Default = () => {
-  return <NotificationBar status="ACCEPTED" />;
+  return <NotificationBar status="ACCEPTED" numberOfNotifications={2} />;
 };
