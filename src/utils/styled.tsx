@@ -12,6 +12,9 @@ export interface Theme {
     positive: string;
     negative: string;
   };
+  fonts: {
+    notifications: string;
+  };
 }
 
 const {

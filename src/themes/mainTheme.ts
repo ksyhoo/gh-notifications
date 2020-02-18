@@ -10,6 +10,9 @@ const mainTheme: Theme = {
     white: "#FFFFFF",
     positive: "f9f9f9",
     negative: "f9f9f9"
+  },
+  fonts: {
+    notifications: "'Roboto', sans-serif"
   }
 };
 
