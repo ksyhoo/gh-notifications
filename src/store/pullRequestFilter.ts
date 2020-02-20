@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PullRequestFilterState } from "utils/types";
+import { userRole } from "utils/constants";
 
 const initialState: PullRequestFilterState = {
-  userInvolvementType: "author"
+  userInvolvementType: userRole.author
 };
 
 export const pullRequestFilterSlice = createSlice({
