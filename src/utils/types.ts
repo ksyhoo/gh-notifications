@@ -22,15 +22,8 @@ export interface PullRequestFilterState {
 export interface PullRequestsState {
   isLoading: boolean;
   error: string | null;
-  createdPullRequests: PullRequest[];
-  reviewRequestedPullRequests: PullRequest[];
+  items: { [id: string]: PullRequest };
 }
-// export interface PullRequestsState {
-//   isLoading: boolean;
-//   error: string | null;
-//   createdPullRequests: { [id: string]: PullRequest };
-//   reviewRequestedPullRequests: PullRequest[];
-// }
 
 export interface NotificationsState {
   isUserAuthor: boolean;

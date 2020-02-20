@@ -11,6 +11,7 @@ export interface Theme {
     white: string;
     positive: string;
     negative: string;
+    opaqueNewPR: string;
   };
   fonts: {
     notifications: string;
