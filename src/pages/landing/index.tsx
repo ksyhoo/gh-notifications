@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import PullRequests from "components/pull-requests";
 import ToolBar from "components/tool-bar";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  fetchPullRequests,
-  // checkForUpdates,
-  checkForUpdatesInStore
-} from "store/pullRequests";
+import { fetchPullRequests, checkForUpdatesInStore } from "store/pullRequests";
 import { State, PullRequestsState, PullRequest } from "utils/types";
 import { Container } from "components/styled";
-import store from "store";
-import watch from "redux-watch";
+import { castToArray, getAuthorPRs, getReviewerPRs } from "utils/helpers";
+import { userRole } from "utils/constants";
 
-const Landing: React.SFC = () => {
+const Landing: React.FC = () => {
   const [data, setData] = useState<PullRequest[]>([]);
+  const [authorPRCount, setAuthorPRCount] = useState<number>(0);
+  const [newAuthorPRCount, setNewAuthorPRCount] = useState<number>(0);
+  const [reviewerPRCount, setReviewerPRCount] = useState<number>(0);
+  const [newReviewerPRCount, setNewReviewerPRCount] = useState<number>(0);
 
   const dispatch = useDispatch();
 
@@ -41,45 +41,28 @@ const Landing: React.SFC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       dispatch(checkForUpdatesInStore());
-    }, 2000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [dispatch, state]);
 
   useEffect(() => {
-    if (pullRequestsOfUserTypeFilter === "author") {
-      setData(state.createdPullRequests);
-    } else {
-      setData(state.reviewRequestedPullRequests);
-    }
-  }, [
-    pullRequestsOfUserTypeFilter,
-    state.createdPullRequests,
-    state.reviewRequestedPullRequests
-  ]);
+    const pullRequestArray = castToArray(state.items);
+    const authorPR = getAuthorPRs(pullRequestArray);
+    const reviewerPR = getReviewerPRs(pullRequestArray);
 
-  // let w = watch(store.getState, "pullRequests.reviewRequestedPullRequests");
-  // store.subscribe(
-  //   w((newVal, oldVal, objectPath) => {
-  //     console.log("%s changed from %s to %s", objectPath, oldVal, newVal);
-  //   })
-  // );
-
-  // console.log(state);
-
-  const subscriberFunc = (pullRequest?: any): boolean => {
-    let s;
-    let w = watch(store.getState, "pullRequests.createdPullRequests[0].title");
-    store.subscribe(
-      w((newVal, oldVal, objectPath) => {
-        console.log("%s changed from %s to %s", objectPath, oldVal, newVal);
-        if (oldVal === newVal) {
-          s = false;
-        }
-        s = true;
-      })
+    setAuthorPRCount(authorPR.length);
+    setNewAuthorPRCount(authorPR.filter(({ hasChanged }) => hasChanged).length);
+    setReviewerPRCount(reviewerPR.length);
+    setNewReviewerPRCount(
+      reviewerPR.filter(({ hasChanged }) => hasChanged).length
     );
-    return s;
-  };
+
+    if (pullRequestsOfUserTypeFilter === userRole.author) {
+      setData(authorPR);
+    } else {
+      setData(reviewerPR);
+    }
+  }, [pullRequestsOfUserTypeFilter, state.items]);
 
   if (isLoading || error) {
     return <p>loading mutha fucka</p>;
@@ -87,14 +70,24 @@ const Landing: React.SFC = () => {
 
   return (
     <Container>
-      <ToolBar />
-      {data.map((item: PullRequest) => (
-        <PullRequests
-          key={item.id}
-          data={item}
-          shouldItemUpdate={subscriberFunc(item)}
-        />
-      ))}
+      <ToolBar
+        author={authorPRCount}
+        reviewer={reviewerPRCount}
+        authorNew={newAuthorPRCount}
+        reviewerNew={newReviewerPRCount}
+      />
+      {data
+        .sort((a, b) =>
+          a.updatedAt.valueOf() < b.updatedAt.valueOf() ? 1 : -1
+        )
+        .sort((a, b) => (a.hasChanged === b.hasChanged ? 1 : -1))
+        .map((item: PullRequest) => (
+          <PullRequests
+            key={item.id}
+            data={item}
+            shouldItemUpdate={item.hasChanged}
+          />
+        ))}
     </Container>
   );
 };
